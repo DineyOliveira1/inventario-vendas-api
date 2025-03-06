@@ -37,27 +37,27 @@ public class VendaService {
 
     public VendaDTO criarVenda(VendaDTO vendaDTO) {
 
-        validarProdutosRepetidos(vendaDTO.getProdutosQuantidade());
+        validarProdutosRepetidos(vendaDTO.produtosQuantidade());
 
         validarLimiteCredito(vendaDTO);
 
         Venda venda = new Venda();
 
-        Cliente cliente = clienteRepository.findById(vendaDTO.getClienteId())
+        Cliente cliente = clienteRepository.findById(vendaDTO.clienteId())
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
         venda.setCliente(cliente);
 
         venda.setDataVenda(LocalDate.now());
 
         Set<Produto> produtos = new HashSet<>();
-        for (Long produtoId : vendaDTO.getProdutosQuantidade().keySet()) {
+        for (Long produtoId : vendaDTO.produtosQuantidade().keySet()) {
             Produto produto = produtoRepository.findById(produtoId)
                     .orElseThrow(() -> new RuntimeException("Produto com ID " + produtoId + " não encontrado"));
             produtos.add(produto);
         }
         venda.setProdutos(produtos);
 
-        BigDecimal valorTotal = calcularValorTotal(vendaDTO.getProdutosQuantidade());
+        BigDecimal valorTotal = calcularValorTotal(vendaDTO.produtosQuantidade());
         venda.setValorTotal(valorTotal);
 
         venda = vendaRepository.save(venda);
@@ -85,23 +85,23 @@ public class VendaService {
         Venda venda = vendaRepository.findById(id)
                 .orElseThrow(() -> new VendaException("Venda não encontrada"));
 
-        validarProdutosRepetidos(vendaDTO.getProdutosQuantidade());
+        validarProdutosRepetidos(vendaDTO.produtosQuantidade());
 
         validarLimiteCredito(vendaDTO);
 
-        Cliente cliente = clienteRepository.findById(vendaDTO.getClienteId())
+        Cliente cliente = clienteRepository.findById(vendaDTO.clienteId())
                 .orElseThrow(() -> new VendaException("Cliente não encontrado"));
         venda.setCliente(cliente);
 
         Set<Produto> produtos = new HashSet<>();
-        for (Long produtoId : vendaDTO.getProdutosQuantidade().keySet()) {
+        for (Long produtoId : vendaDTO.produtosQuantidade().keySet()) {
             Produto produto = produtoRepository.findById(produtoId)
                     .orElseThrow(() -> new ProdutoNotFoundException("Produto não encontrado"));
             produtos.add(produto);
         }
         venda.setProdutos(produtos);
 
-        BigDecimal valorTotal = calcularValorTotal(vendaDTO.getProdutosQuantidade());
+        BigDecimal valorTotal = calcularValorTotal(vendaDTO.produtosQuantidade());
         venda.setValorTotal(valorTotal);
 
         venda = vendaRepository.save(venda);
@@ -119,10 +119,10 @@ public class VendaService {
     }
 
     private void validarLimiteCredito(VendaDTO vendaDTO) {
-        Cliente cliente = clienteRepository.findById(vendaDTO.getClienteId())
+        Cliente cliente = clienteRepository.findById(vendaDTO.clienteId())
                 .orElseThrow(() -> new VendaException("Cliente não encontrado"));
 
-        BigDecimal valorTotalVenda = calcularValorTotal(vendaDTO.getProdutosQuantidade());
+        BigDecimal valorTotalVenda = calcularValorTotal(vendaDTO.produtosQuantidade());
         BigDecimal limiteCreditoDisponivel = calcularLimiteCreditoDisponivel(cliente);
 
         if (valorTotalVenda.compareTo(limiteCreditoDisponivel) > 0) {
