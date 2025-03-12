@@ -14,15 +14,16 @@ import java.util.List;
 @Service
 public class ClienteService {
 
-    final private ClienteRepository clienteRepository;
+        private final ClienteRepository clienteRepository;
 
-    @Autowired
-    private ClienteMapper clienteMapper;
+        @Autowired
+        private  ClienteMapper clienteMapper;
 
-    public ClienteService(ClienteRepository clienteRepository) {
-        this.clienteRepository = clienteRepository;
+        @Autowired
+        public ClienteService(ClienteRepository clienteRepository) {
+            this.clienteRepository = clienteRepository;
 
-    }
+        }
 
     public ClienteDto saveCliente(ClienteDto clienteDto) {
         Cliente cliente = clienteMapper.toEntity(clienteDto);
@@ -33,9 +34,9 @@ public class ClienteService {
     public ClienteDto updateCliente(Long id, ClienteDto clienteDto) {
         Cliente clienteExistente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ClienteNotFoundException("Cliente não encontrado para o id: " + id));
-        clienteExistente.setNome(clienteDto.nome());
-        clienteExistente.setLimiteCredito(clienteDto.limiteCredito());
-        clienteExistente.setDiaFechamentoFatura(clienteDto.diaFechamentoFatura());
+        clienteExistente.setNome(clienteDto.getNome());
+        clienteExistente.setLimiteCredito(clienteDto.getLimiteCredito());
+        clienteExistente.setDiaFechamentoFatura(clienteDto.getDiaFechamentoFatura());
 
         Cliente clienteAtualizado = clienteRepository.save(clienteExistente);
         return clienteMapper.toDto(clienteAtualizado);
