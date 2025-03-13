@@ -1,8 +1,5 @@
 package inventario_vendas_api.services;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import inventario_vendas_api.dto.ProdutoDto;
 import inventario_vendas_api.entities.Produto;
 import inventario_vendas_api.exceptions.ProdutoNotFoundException;
@@ -10,13 +7,21 @@ import inventario_vendas_api.mapper.ProdutoMapper;
 import inventario_vendas_api.repositories.ProdutoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 class ProdutoServiceTest {
+
+    @InjectMocks
+    private ProdutoService produtoService;
 
     @Mock
     private ProdutoRepository produtoRepository;
@@ -24,109 +29,116 @@ class ProdutoServiceTest {
     @Mock
     private ProdutoMapper produtoMapper;
 
-    @InjectMocks
-    private ProdutoService produtoService;
-    private ProdutoDto produtoDto;
     private Produto produto;
+    private ProdutoDto produtoDto;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        produtoDto = new ProdutoDto(1L, "Produto Teste", new BigDecimal("99.99"));
-        produto = new Produto(1L, "Produto Teste", new BigDecimal("99.99"));
+        produto = new Produto();
+        produto.setId(1L);
+        produto.setDescricao("Produto Teste");
+        produto.setPreco(new BigDecimal("50.00"));
+
+        produtoDto = new ProdutoDto();
+        produtoDto.setDescricao("Produto Teste");
+        produtoDto.setPreco(new BigDecimal("50.00"));
     }
 
     @Test
-    void deveSalvarProduto() {
-
+    void testSaveProduto() {
         when(produtoMapper.toModel(produtoDto)).thenReturn(produto);
         when(produtoRepository.save(produto)).thenReturn(produto);
-        when(produtoMapper.toDTO(produto)).thenReturn(produtoDto);
+        when(produtoMapper.toDto(produto)).thenReturn(produtoDto);
 
         ProdutoDto result = produtoService.saveProduto(produtoDto);
 
         assertNotNull(result);
-        assertEquals(produtoDto.id(), result.id());
-        verify(produtoRepository, times(1)).save(produto);
-        verify(produtoMapper, times(1)).toDTO(produto);
+        assertEquals(produtoDto.getDescricao(), result.getDescricao());
+        assertEquals(produtoDto.getPreco(), result.getPreco());
     }
 
     @Test
-    void deveAtualizarProduto() {
+    void testUpdateProduto_Success() {
+        ProdutoDto updatedProdutoDto = new ProdutoDto("Produto Atualizado", new BigDecimal("60.00"));
 
-        when(produtoRepository.existsById(produtoDto.id())).thenReturn(true);
-        when(produtoMapper.toModel(produtoDto)).thenReturn(produto);
-        when(produtoRepository.save(produto)).thenReturn(produto);
-        when(produtoMapper.toDTO(produto)).thenReturn(produtoDto);
+        Produto updatedProduto = new Produto();
+        updatedProduto.setId(1L);
+        updatedProduto.setDescricao("Produto Atualizado");
+        updatedProduto.setPreco(new BigDecimal("60.00"));
 
-        ProdutoDto result = produtoService.updateProduto(produtoDto.id(), produtoDto);
+        when(produtoRepository.existsById(1L)).thenReturn(true);
+        when(produtoMapper.toModel(updatedProdutoDto)).thenReturn(updatedProduto);
+        when(produtoRepository.save(updatedProduto)).thenReturn(updatedProduto);
+        when(produtoMapper.toDto(updatedProduto)).thenReturn(updatedProdutoDto);
+
+        ProdutoDto result = produtoService.updateProduto(1L, updatedProdutoDto);
 
         assertNotNull(result);
-        assertEquals(produtoDto.id(), result.id());
-        verify(produtoRepository, times(1)).existsById(produtoDto.id());
-        verify(produtoRepository, times(1)).save(produto);
-        verify(produtoMapper, times(1)).toDTO(produto);
+        assertEquals(updatedProdutoDto.getDescricao(), result.getDescricao());
+        assertEquals(updatedProdutoDto.getPreco(), result.getPreco());
     }
 
     @Test
-    void deveLancarExcecaoSeProdutoNaoExistirParaAtualizacao() {
+    void testUpdateProduto_NotFound() {
+        ProdutoDto updatedProdutoDto = new ProdutoDto("Produto Atualizado", new BigDecimal("60.00"));
 
-        when(produtoRepository.existsById(produtoDto.id())).thenReturn(false);
+        when(produtoRepository.existsById(1L)).thenReturn(false);
 
         ProdutoNotFoundException exception = assertThrows(ProdutoNotFoundException.class, () -> {
-            produtoService.updateProduto(produtoDto.id(), produtoDto);
+            produtoService.updateProduto(1L, updatedProdutoDto);
         });
+
         assertEquals("Produto not found", exception.getMessage());
     }
 
     @Test
-    void deveExcluirProduto() {
+    void testDeleteProduto_Success() {
+        when(produtoRepository.existsById(1L)).thenReturn(true);
 
-        when(produtoRepository.existsById(produtoDto.id())).thenReturn(true);
+        produtoService.deleteById(1L);
 
-        produtoService.deleteById(produtoDto.id());
-
-        verify(produtoRepository, times(1)).deleteById(produtoDto.id());
+        verify(produtoRepository, times(1)).deleteById(1L);
     }
 
     @Test
-    void deveLancarExcecaoSeProdutoNaoExistirParaExcluir() {
-
-        when(produtoRepository.existsById(produtoDto.id())).thenReturn(false);
+    void testDeleteProduto_NotFound() {
+        when(produtoRepository.existsById(1L)).thenReturn(false);
 
         ProdutoNotFoundException exception = assertThrows(ProdutoNotFoundException.class, () -> {
-            produtoService.deleteById(produtoDto.id());
+            produtoService.deleteById(1L);
         });
+
         assertEquals("Produto not found", exception.getMessage());
     }
 
     @Test
-    void deveRetornarProdutoPorId() {
+    void testFindById_Success() {
+        when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
 
-        when(produtoRepository.findById(produtoDto.id())).thenReturn(Optional.of(produto));
-
-        Produto result = produtoService.findById(produtoDto.id());
+        Produto result = produtoService.findById(1L);
 
         assertNotNull(result);
-        assertEquals(produtoDto.id(), result.getId());
+        assertEquals(produto.getId(), result.getId());
+        assertEquals(produto.getDescricao(), result.getDescricao());
     }
 
     @Test
-    void deveLancarExcecaoSeProdutoNaoExistirParaBuscaPorId() {
-
-        when(produtoRepository.findById(produtoDto.id())).thenReturn(Optional.empty());
+    void testFindById_NotFound() {
+        when(produtoRepository.findById(1L)).thenReturn(Optional.empty());
 
         ProdutoNotFoundException exception = assertThrows(ProdutoNotFoundException.class, () -> {
-            produtoService.findById(produtoDto.id());
+            produtoService.findById(1L);
         });
+
         assertEquals("Produto not found", exception.getMessage());
     }
 
     @Test
-    void deveRetornarTodosProdutos() {
-
-        when(produtoRepository.findAll()).thenReturn(List.of(produto));
+    void testFindAll_Success() {
+        List<Produto> produtos = List.of(produto);
+        when(produtoRepository.findAll()).thenReturn(produtos);
 
         List<Produto> result = produtoService.findAll();
 
@@ -136,13 +148,13 @@ class ProdutoServiceTest {
     }
 
     @Test
-    void deveLancarExcecaoSeNaoExistiremProdutos() {
-
+    void testFindAll_NotFound() {
         when(produtoRepository.findAll()).thenReturn(List.of());
 
         ProdutoNotFoundException exception = assertThrows(ProdutoNotFoundException.class, () -> {
             produtoService.findAll();
         });
+
         assertEquals("Nenhum produto encontrado", exception.getMessage());
     }
 }

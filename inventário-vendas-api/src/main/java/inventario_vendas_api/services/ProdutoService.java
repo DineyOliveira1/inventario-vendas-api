@@ -1,11 +1,11 @@
 package inventario_vendas_api.services;
 
-
 import inventario_vendas_api.dto.ProdutoDto;
 import inventario_vendas_api.entities.Produto;
 import inventario_vendas_api.exceptions.ProdutoNotFoundException;
 import inventario_vendas_api.mapper.ProdutoMapper;
 import inventario_vendas_api.repositories.ProdutoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -15,16 +15,17 @@ public class ProdutoService {
     private final ProdutoRepository produtoRepository;
     private final ProdutoMapper produtoMapper;
 
-
+    @Autowired
     public ProdutoService(ProdutoRepository produtoRepository, ProdutoMapper produtoMapper) {
         this.produtoRepository = produtoRepository;
         this.produtoMapper = produtoMapper;
+
     }
 
     public ProdutoDto saveProduto(ProdutoDto produtoDto) {
         Produto produto = produtoMapper.toModel(produtoDto);
         produto = produtoRepository.save(produto);
-        return produtoMapper.toDTO(produto);
+        return produtoMapper.toDto(produto);
     }
 
     public ProdutoDto updateProduto(Long id, ProdutoDto produtoDto) {
@@ -34,7 +35,7 @@ public class ProdutoService {
         Produto produto = produtoMapper.toModel(produtoDto);
         produto.setId(id);
         produto = produtoRepository.save(produto);
-        return produtoMapper.toDTO(produto);
+        return produtoMapper.toDto(produto);
     }
 
     public void deleteById(Long id) {

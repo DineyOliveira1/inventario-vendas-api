@@ -1,17 +1,10 @@
 package inventario_vendas_api.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 import java.math.BigDecimal;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 @Table(name = "cliente")
 public class Cliente {
 
@@ -28,6 +21,48 @@ public class Cliente {
     @Column(name = "data_fechamento")
     private Integer diaFechamentoFatura;
 
+    public Cliente() {
+    }
+
+    public Cliente(Long id, String nome, BigDecimal limiteCredito, Integer diaFechamentoFatura) {
+        this.id = id;
+        this.nome = nome;
+        this.limiteCredito = limiteCredito;
+        this.diaFechamentoFatura = diaFechamentoFatura;
+
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public BigDecimal getLimiteCredito() {
+        return limiteCredito;
+    }
+
+    public void setLimiteCredito(BigDecimal limiteCredito) {
+        this.limiteCredito = limiteCredito;
+    }
+
+    public Integer getDiaFechamentoFatura() {
+        return diaFechamentoFatura;
+    }
+
+    public void setDiaFechamentoFatura(Integer diaFechamentoFatura) {
+        this.diaFechamentoFatura = diaFechamentoFatura;
+    }
 
     @Override
     public String toString() {
@@ -39,4 +74,6 @@ public class Cliente {
                 '}';
     }
 }
+
+
 

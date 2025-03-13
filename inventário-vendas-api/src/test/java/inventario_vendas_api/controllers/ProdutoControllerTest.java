@@ -47,7 +47,7 @@ class ProdutoControllerTest {
 
     @BeforeEach
     void setUp() {
-        produtoDto = new ProdutoDto(1L, "Produto Teste", new BigDecimal("99.99"));
+        produtoDto = new ProdutoDto("Produto Teste", new BigDecimal("99.99"));
 
         produto = new Produto();
         produto.setId(1L);

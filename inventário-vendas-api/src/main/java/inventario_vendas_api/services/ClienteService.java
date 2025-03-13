@@ -14,14 +14,13 @@ import java.util.List;
 @Service
 public class ClienteService {
 
-        private final ClienteRepository clienteRepository;
+    private final ClienteRepository clienteRepository;
+    private final ClienteMapper clienteMapper;
 
-        @Autowired
-        private  ClienteMapper clienteMapper;
-
-        @Autowired
-        public ClienteService(ClienteRepository clienteRepository) {
-            this.clienteRepository = clienteRepository;
+    @Autowired
+    public ClienteService(ClienteRepository clienteRepository, ClienteMapper clienteMapper) {
+        this.clienteRepository = clienteRepository;
+        this.clienteMapper = clienteMapper;
 
         }
 
@@ -56,10 +55,11 @@ public class ClienteService {
     public List<Cliente> findAll() {
         List<Cliente> cliente = clienteRepository.findAll();
         if (cliente.isEmpty()) {
-            throw new ProdutoNotFoundException("Nenhum produto encontrado");
+            throw new ClienteNotFoundException("Nenhum cliente encontrado");
         }
         return cliente;
     }
+
 }
 
 

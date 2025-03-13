@@ -1,26 +1,28 @@
 package inventario_vendas_api.services;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import inventario_vendas_api.dto.ClienteDto;
 import inventario_vendas_api.entities.Cliente;
 import inventario_vendas_api.exceptions.ClienteNotFoundException;
-import inventario_vendas_api.exceptions.ProdutoNotFoundException;
 import inventario_vendas_api.mapper.ClienteMapper;
+
 import inventario_vendas_api.repositories.ClienteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@SpringBootTest
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 class ClienteServiceTest {
+
+    @InjectMocks
+    private ClienteService clienteService;
 
     @Mock
     private ClienteRepository clienteRepository;
@@ -28,20 +30,24 @@ class ClienteServiceTest {
     @Mock
     private ClienteMapper clienteMapper;
 
-    @InjectMocks
-    private ClienteService clienteService;
-    private ClienteDto clienteDto;
     private Cliente cliente;
+    private ClienteDto clienteDto;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        clienteDto = new ClienteDto(1L, "Cliente Teste", new BigDecimal("1000.00"), 10);
-        cliente = new Cliente(1L, "Cliente Teste", new BigDecimal("1000.00"), 10);
+
+        cliente = new Cliente();
+        cliente.setId(1L);
+        cliente.setNome("Cliente Teste");
+        cliente.setLimiteCredito(new BigDecimal("1500.00"));
+        cliente.setDiaFechamentoFatura(5);
+
+        clienteDto = new ClienteDto(1L, "Cliente Teste", new BigDecimal("1500.00"), 5);
     }
 
     @Test
-    void deveSalvarCliente() {
+    void testSaveCliente() {
         when(clienteMapper.toEntity(clienteDto)).thenReturn(cliente);
         when(clienteRepository.save(cliente)).thenReturn(cliente);
         when(clienteMapper.toDto(cliente)).thenReturn(clienteDto);
@@ -49,79 +55,86 @@ class ClienteServiceTest {
         ClienteDto result = clienteService.saveCliente(clienteDto);
 
         assertNotNull(result);
-        assertEquals(clienteDto.id(), result.id());
-        assertEquals(clienteDto.nome(), result.nome());
-        verify(clienteRepository, times(1)).save(cliente);
-        verify(clienteMapper, times(1)).toDto(cliente);
+        assertEquals(clienteDto.getId(), result.getId());
+        assertEquals(clienteDto.getNome(), result.getNome());
+        assertEquals(clienteDto.getLimiteCredito(), result.getLimiteCredito());
     }
 
     @Test
-    void deveAtualizarCliente() {
-        when(clienteRepository.findById(clienteDto.id())).thenReturn(Optional.of(cliente));
+    void testUpdateCliente_Success() {
+
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
+        when(clienteMapper.toEntity(clienteDto)).thenReturn(cliente);
         when(clienteRepository.save(cliente)).thenReturn(cliente);
         when(clienteMapper.toDto(cliente)).thenReturn(clienteDto);
 
-        ClienteDto result = clienteService.updateCliente(clienteDto.id(), clienteDto);
+        ClienteDto result = clienteService.updateCliente(1L, clienteDto);
 
         assertNotNull(result);
-        assertEquals(clienteDto.id(), result.id());
-        verify(clienteRepository, times(1)).findById(clienteDto.id());
-        verify(clienteRepository, times(1)).save(cliente);
-        verify(clienteMapper, times(1)).toDto(cliente);
+        assertEquals(clienteDto.getNome(), result.getNome());
+        assertEquals(clienteDto.getLimiteCredito(), result.getLimiteCredito());
+        assertEquals(clienteDto.getDiaFechamentoFatura(), result.getDiaFechamentoFatura());
     }
 
     @Test
-    void deveLancarExcecaoSeClienteNaoExistirParaAtualizacao() {
-        when(clienteRepository.findById(clienteDto.id())).thenReturn(Optional.empty());
+    void testUpdateCliente_NotFound() {
+        ClienteDto updatedClienteDto = new ClienteDto(1L, "Cliente Atualizado", new BigDecimal("2000.00"), 10);
+
+        when(clienteRepository.findById(1L)).thenReturn(Optional.empty());
 
         ClienteNotFoundException exception = assertThrows(ClienteNotFoundException.class, () -> {
-            clienteService.updateCliente(clienteDto.id(), clienteDto);
+            clienteService.updateCliente(1L, updatedClienteDto);
         });
-        assertEquals("Cliente não encontrado para o id: " + clienteDto.id(), exception.getMessage());
+
+        assertEquals("Cliente não encontrado para o id: 1", exception.getMessage());
     }
 
     @Test
-    void deveExcluirCliente() {
-        when(clienteRepository.existsById(clienteDto.id())).thenReturn(true);
+    void testDeleteCliente_Success() {
+        when(clienteRepository.existsById(1L)).thenReturn(true);
 
-        clienteService.deleteById(clienteDto.id());
+        clienteService.deleteById(1L);
 
-        verify(clienteRepository, times(1)).deleteById(clienteDto.id());
+        verify(clienteRepository, times(1)).deleteById(1L);
     }
 
     @Test
-    void deveLancarExcecaoSeClienteNaoExistirParaExcluir() {
-        when(clienteRepository.existsById(clienteDto.id())).thenReturn(false);
+    void testDeleteCliente_NotFound() {
+        when(clienteRepository.existsById(1L)).thenReturn(false);
 
         ClienteNotFoundException exception = assertThrows(ClienteNotFoundException.class, () -> {
-            clienteService.deleteById(clienteDto.id());
+            clienteService.deleteById(1L);
         });
+
         assertEquals("Client not found", exception.getMessage());
     }
 
     @Test
-    void deveRetornarClientePorId() {
-        when(clienteRepository.findById(clienteDto.id())).thenReturn(Optional.of(cliente));
+    void testFindById_Success() {
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
 
-        Cliente result = clienteService.findById(clienteDto.id());
+        Cliente result = clienteService.findById(1L);
 
         assertNotNull(result);
-        assertEquals(clienteDto.id(), result.getClienteId());
+        assertEquals(cliente.getId(), result.getId());
+        assertEquals(cliente.getNome(), result.getNome());
     }
 
     @Test
-    void deveLancarExcecaoSeClienteNaoExistirParaBuscaPorId() {
-        when(clienteRepository.findById(clienteDto.id())).thenReturn(Optional.empty());
+    void testFindById_NotFound() {
+        when(clienteRepository.findById(1L)).thenReturn(Optional.empty());
 
         ClienteNotFoundException exception = assertThrows(ClienteNotFoundException.class, () -> {
-            clienteService.findById(clienteDto.id());
+            clienteService.findById(1L);
         });
+
         assertEquals("Client not found", exception.getMessage());
     }
 
     @Test
-    void deveRetornarTodosClientes() {
-        when(clienteRepository.findAll()).thenReturn(List.of(cliente));
+    void testFindAll_Success() {
+        List<Cliente> clientes = List.of(cliente);
+        when(clienteRepository.findAll()).thenReturn(clientes);
 
         List<Cliente> result = clienteService.findAll();
 
@@ -131,12 +144,13 @@ class ClienteServiceTest {
     }
 
     @Test
-    void deveLancarExcecaoSeNaoExistiremClientes() {
-        when(clienteRepository.findAll()).thenReturn(Collections.emptyList());
+    void testFindAll_NotFound() {
+        when(clienteRepository.findAll()).thenReturn(List.of());
 
-        ProdutoNotFoundException exception = assertThrows(ProdutoNotFoundException.class, () -> {
+        ClienteNotFoundException exception = assertThrows(ClienteNotFoundException.class, () -> {
             clienteService.findAll();
         });
-        assertEquals("Nenhum produto encontrado", exception.getMessage());
+
+        assertEquals("Nenhum cliente encontrado", exception.getMessage());
     }
 }

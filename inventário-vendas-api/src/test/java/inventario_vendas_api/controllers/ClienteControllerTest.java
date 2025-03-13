@@ -48,10 +48,9 @@ class ClienteControllerTest {
     @BeforeEach
     void setUp() {
 
-        clienteDto = new ClienteDto(1L, "João", new BigDecimal("1000.00"), 10);
+        clienteDto = new ClienteDto(1L,"João", new BigDecimal("1000.00"), 10);
 
         cliente = new Cliente();
-        cliente.setClienteId(1L);
         cliente.setNome("João");
         cliente.setLimiteCredito(new BigDecimal("1000.00"));
         cliente.setDiaFechamentoFatura(10);
