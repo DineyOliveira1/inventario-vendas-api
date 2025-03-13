@@ -1,6 +1,5 @@
 package inventario_vendas_api.controllers;
 
-
 import inventario_vendas_api.dto.VendaDTO;
 import inventario_vendas_api.services.VendaService;
 import org.springframework.beans.factory.annotation.Autowired;

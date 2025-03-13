@@ -18,17 +18,20 @@ import java.util.*;
 @Service
 public class VendaService {
 
-    @Autowired
-    private VendaRepository vendaRepository;
+    final private VendaRepository vendaRepository;
 
-    @Autowired
-    private ClienteRepository clienteRepository;
+    final private ClienteRepository clienteRepository;
 
-    @Autowired
-    private ProdutoRepository produtoRepository;
+    final private ProdutoRepository produtoRepository;
 
-    @Autowired
-    private VendaMapper vendaMapper;
+    final private VendaMapper vendaMapper;
+
+    public VendaService(VendaRepository vendaRepository, ClienteRepository clienteRepository, ProdutoRepository produtoRepository, VendaMapper vendaMapper) {
+        this.vendaRepository = vendaRepository;
+        this.clienteRepository = clienteRepository;
+        this.produtoRepository = produtoRepository;
+        this.vendaMapper = vendaMapper;
+    }
 
     public VendaDTO criarVenda(VendaDTO vendaDTO) {
 

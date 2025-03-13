@@ -3,15 +3,12 @@ package inventario_vendas_api.controllers;
 import inventario_vendas_api.dto.ClienteDto;
 import inventario_vendas_api.entities.Cliente;
 import inventario_vendas_api.exceptions.ClienteNotFoundException;
-import inventario_vendas_api.exceptions.ProdutoNotFoundException;
 import inventario_vendas_api.services.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
-
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -25,7 +22,7 @@ public class ClienteController {
     public ResponseEntity<?> createCliente(@Valid @RequestBody ClienteDto clienteDto) {
         try {
             clienteService.saveCliente(clienteDto);
-            return ResponseEntity.status(HttpStatus.OK).body(clienteDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(clienteDto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (RuntimeException e) {
@@ -36,10 +33,10 @@ public class ClienteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCliente(@Valid @RequestBody ClienteDto ClienteDto, @PathVariable Long id) {
+    public ResponseEntity<?> updateCliente(@Valid @RequestBody ClienteDto clienteDto, @PathVariable Long id) {
         try {
-            clienteService.updateCliente(id, ClienteDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(ClienteDto);
+            ClienteDto atualizado = clienteService.updateCliente(id, clienteDto);
+            return ResponseEntity.status(HttpStatus.OK).body(atualizado);
         } catch (ClienteNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -55,7 +52,7 @@ public class ClienteController {
     public ResponseEntity<?> deleteCliente(@PathVariable Long id) {
         try {
             clienteService.deleteById(id);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Cliente deletado com sucesso");
+            return ResponseEntity.noContent().build();
         } catch (ClienteNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
@@ -76,12 +73,14 @@ public class ClienteController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Cliente>> getAllCliente() {
+    public ResponseEntity<?> getAllClientes() {
         try {
-            List<Cliente> cliente = clienteService.findAll();
-            return ResponseEntity.ok(cliente);
-        } catch (ProdutoNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+            List<Cliente> clientes = clienteService.findAll();
+            return ResponseEntity.ok(clientes);
+        } catch (ClienteNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhum cliente encontrado");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Erro interno no servidor");
         }
     }
 }

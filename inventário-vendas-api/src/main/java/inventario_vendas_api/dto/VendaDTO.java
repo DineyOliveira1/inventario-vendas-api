@@ -23,6 +23,12 @@ public class VendaDTO {
         this.valorTotal = valorTotal;
     }
 
+    public VendaDTO(Long id, Set<Long> produtos, Long clienteId) {
+        this.id = id;
+        this.produtos = produtos;
+        this.clienteId = clienteId;
+    }
+
     public Long getId() {
         return id;
     }
