@@ -7,8 +7,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
-@NoArgsConstructor
-@AllArgsConstructor
 public class VendaDTO {
 
     private Long id;
@@ -16,6 +14,14 @@ public class VendaDTO {
     private BigDecimal valorTotal;
     private LocalDate dataVenda;
     private Set<Long> produtos;
+    public VendaDTO() {}
+
+    public VendaDTO(Long id, Long clienteId, Set<Long> produtos, BigDecimal valorTotal) {
+        this.id = id;
+        this.clienteId = clienteId;
+        this.produtos = produtos;
+        this.valorTotal = valorTotal;
+    }
 
     public Long getId() {
         return id;
