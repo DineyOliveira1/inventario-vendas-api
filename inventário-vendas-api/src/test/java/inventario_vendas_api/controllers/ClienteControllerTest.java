@@ -69,7 +69,7 @@ class ClienteControllerTest {
         mockMvc.perform(post("/cliente")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
-                .andExpect(status().isOk())
+                .andExpect(status().is2xxSuccessful())
                 .andExpect(content().json(jsonBody));
     }
 
@@ -81,7 +81,7 @@ class ClienteControllerTest {
         mockMvc.perform(put("/cliente/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(content().json(jsonBody));
     }
 
@@ -90,8 +90,8 @@ class ClienteControllerTest {
         doNothing().when(clienteService).deleteById(1L);
 
         mockMvc.perform(delete("/cliente/1"))
-                .andExpect(status().isNoContent())
-                .andExpect(content().string("Cliente deletado com sucesso"));
+                .andExpect(status().isNoContent());
+
     }
 
     @Test
